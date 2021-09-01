@@ -32,8 +32,7 @@ void main()
     vec4 col = color * vec4(light,1) * texture2D(texture,coord0);
 
     //Calculate fog intensity in or out of water.
-    float fog = (isEyeInWater>0) ? 1.-exp(-gl_FogFragCoord * gl_Fog.density):
-    clamp((gl_FogFragCoord-gl_Fog.start) * gl_Fog.scale, 0., 1.);
+    float fog = clamp((gl_FogFragCoord-gl_Fog.start) * gl_Fog.scale, 0., 1.);
 
     //Apply the fog.
     col.rgb = mix(col.rgb, gl_Fog.color.rgb, fog);
