@@ -24,6 +24,10 @@ varying vec4 color;
 //Diffuse texture coordinates.
 varying vec2 coord0;
 
+const int GL_LINEAR = 9729;
+const int GL_EXP = 2048;
+uniform int fogMode;
+
 void main()
 {
     //Visibility amount.
@@ -32,7 +36,15 @@ void main()
     vec4 col = color * vec4(light,1) * texture2D(texture,coord0);
 
     //Calculate fog intensity in or out of water.
-    float fog = clamp((gl_FogFragCoord-gl_Fog.start) * gl_Fog.scale, 0., 1.);
+    float fog;
+    if(fogMode == GL_EXP)
+        fog = 1.-exp(-gl_FogFragCoord * gl_Fog.density);
+    else if (fogMode == GL_LINEAR)
+        fog = clamp((gl_FogFragCoord-gl_Fog.start) * gl_Fog.scale, 0., 1.);
+    else if (isEyeInWater == 1.0 || isEyeInWater == 2.0)
+        fog = 1.-exp(-gl_FogFragCoord * gl_Fog.density);
+
+    //float fog = clamp((gl_FogFragCoord-gl_Fog.start) * gl_Fog.scale, 0., 1.);
 
     //Apply the fog.
     col.rgb = mix(col.rgb, gl_Fog.color.rgb, fog);
