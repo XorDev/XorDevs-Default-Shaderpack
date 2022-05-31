@@ -38,8 +38,8 @@ void main()
     //Use flat for flat "blocks" or world space normal for solid blocks.
     normal = (mc_Entity==1.) ? vec3(0,1,0) : (gbufferModelViewInverse * vec4(normal,0)).xyz;
 
-    //Calculate simple lighting. Note: This as close as I (XorDev) could get, but it's not perfect!
-    float light = .8-.25*abs(normal.x*.9+normal.z*.3)+normal.y*.2;
+    //Calculate simple lighting. Thanks to @PepperCode1
+    float light = min(normal.x * normal.x * 0.6f + normal.y * normal.y * 0.25f * (3.0f + normal.y) + normal.z * normal.z * 0.8f, 1.0f);
 
     //Output color with lighting to fragment shader.
     color = vec4(gl_Color.rgb * light, gl_Color.a);
