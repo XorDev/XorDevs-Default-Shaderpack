@@ -19,9 +19,6 @@ uniform sampler2D texture;
 //Lighting from day/night + shadows + light sources.
 uniform sampler2D lightmap;
 
-//RGB+intensity for hurt entities and flashing creepers. (this uniform can only be used in the 'gbuffers_entities' shader, which is this shader unless you fill in the gbuffers_entities shader)
-uniform vec4 entityColor;
-
 //Vertex color.
 varying vec4 color;
 //Diffuse and lightmap texture coordinates.
@@ -34,17 +31,6 @@ void main()
     vec3 light = (1.0-blindness) * texture2D(lightmap,coord1).rgb;
     //Sample texture times lighting.
     vec4 col = color * vec4(light,1.0) * texture2D(texture,coord0);
-    //Apply entity flashes.
-    col.rgb = mix(col.rgb,entityColor.rgb,entityColor.a);
-
-    //Calculate and apply fog.
-    float fog;
-    if(fogMode == GL_LINEAR){
-        fog = clamp((gl_FogFragCoord-gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
-    } else if(fogMode == GL_EXP || isEyeInWater >= 1){
-        fog = clamp(1.0-exp(-gl_FogFragCoord * gl_Fog.density), 0.0, 1.0);
-    }
-    col.rgb = mix(col.rgb, fogColor, fog);
 
     //Output the result.
     /* DRAWBUFFERS:0 */

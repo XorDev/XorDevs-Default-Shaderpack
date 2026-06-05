@@ -14,22 +14,20 @@
 //Include common code
 #include "/common.glsl"
 
-//Diffuse (color) texture.
-uniform sampler2D texture;
-
-//Vertex color.
+//Pass vertex information to fragment shader.
 varying vec4 color;
-//Diffuse texture coordinates.
-varying vec2 coord0;
+//Position in player space
+varying vec3 pos;
 
 void main()
 {
-    //Visibility amount.
-    vec3 light = vec3(1.0-blindness);
-    //Sample texture times Visibility.
-    vec4 col = color * vec4(light,1.0) * texture2D(texture,coord0);
+    //Calculate player-space position.
+    pos = (gl_ModelViewMatrix * gl_Vertex).xyz;
+    pos = (gbufferModelViewInverse * vec4(pos,1)).xyz;
 
-    //Output the result.
-    /* DRAWBUFFERS:0 */
-    gl_FragData[0] = col;
+    //Output position and fog to fragment shader.
+    gl_Position = gl_ProjectionMatrix * gbufferModelView * vec4(pos,1);
+
+    //Output color to fragment shader.
+    color = gl_Color;
 }

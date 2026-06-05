@@ -11,9 +11,8 @@
 //Declare GL version.
 #version 120
 
-//Model * view matrix and it's inverse.
-uniform mat4 gbufferModelView;
-uniform mat4 gbufferModelViewInverse;
+//Include common code
+#include "/common.glsl"
 
 //Pass vertex information to fragment shader.
 varying vec4 color;
@@ -21,7 +20,7 @@ varying vec2 coord0;
 
 void main()
 {
-    //Calculate world space position.
+    //Calculate player-space position.
     vec3 pos = (gl_ModelViewMatrix * gl_Vertex).xyz;
     pos = (gbufferModelViewInverse * vec4(pos,1)).xyz;
 

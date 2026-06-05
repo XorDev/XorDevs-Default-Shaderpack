@@ -14,21 +14,24 @@
 //Include common code
 #include "/common.glsl"
 
-//Vertex color. (this is marked as 'flat' because it fixes leads, but if might break other stuff, I'm not sure)
-flat varying vec4 color;
+//Vertex color.
+varying vec4 color;
+//Position in player space
+varying vec3 pos;
 
 void main()
 {
     vec4 col = color;
 
-    //Calculate and apply fog.
-    float fog;
-    if(fogMode == GL_LINEAR){
-        fog = clamp((gl_FogFragCoord-gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
-    } else if(fogMode == GL_EXP || isEyeInWater >= 1){
-        fog = clamp(1.0-exp(-gl_FogFragCoord * gl_Fog.density), 0.0, 1.0);
+    bool isStar = col.r == col.g && col.g == col.b && col.r > 0.3;
+    bool isSunriseSunsetHorizon = col.r > col.g * 1.2;
+    if (!isStar && !isSunriseSunsetHorizon) {
+        float fog = 1.0 - max(normalize(pos).y - 0.06, 0.0);
+        fog =
+         0.7 * fog * fog * fog * fog * fog * fog * fog * fog
+         + 0.3 * fog;
+        col.rgb = mix(col.rgb, fogColor, fog);
     }
-    col.rgb = mix(col.rgb, fogColor, fog);
 
     //Output the result.
     /* DRAWBUFFERS:0 */
