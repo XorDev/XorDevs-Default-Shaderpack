@@ -23,6 +23,10 @@ uniform mat4 gbufferModelViewInverse;
 //Counts the number of rendered frames
 uniform int frameCounter;
 
+//The resolution of minecraft's window
+uniform float viewWidth;
+uniform float viewHeight;
+
 
 
 //Constants

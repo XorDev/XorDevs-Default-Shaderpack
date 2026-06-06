@@ -33,6 +33,9 @@ void main()
         col.rgb = mix(col.rgb, fogColor, fog);
     }
 
+    //Add some dithering to help decrease color banding
+    col.rgb += (fract(52.9829189 * fract(0.06711056 * gl_FragCoord.x + 0.00583715 * gl_FragCoord.y + 0.0003181 * frameCounter)) - 0.5) / 255.0;
+
     //Output the result.
     /* DRAWBUFFERS:0 */
     gl_FragData[0] = col;
