@@ -11,17 +11,16 @@
 //Declare GL version.
 #version 120
 
+//Include common code
+#include "/common.glsl"
+
 //Diffuse (color) texture.
 uniform sampler2D texture;
 //Lighting from day/night + shadows + light sources.
 uniform sampler2D lightmap;
 
-//RGB/intensity for hurt entities and flashing creepers.
+//RGB+intensity for hurt entities and flashing creepers. (this uniform can only be used in the 'gbuffers_entities' shader, which is this shader unless you fill in the gbuffers_entities shader)
 uniform vec4 entityColor;
-//0-1 amount of blindness.
-uniform float blindness;
-//0 = default, 1 = water, 2 = lava.
-uniform int isEyeInWater;
 
 //Vertex color.
 varying vec4 color;
@@ -32,19 +31,25 @@ varying vec2 coord1;
 void main()
 {
     //Combine lightmap with blindness.
-    vec3 light = (1.-blindness) * texture2D(lightmap,coord1).rgb;
+    vec3 light = (1.0-blindness) * texture2D(lightmap,coord1).rgb;
     //Sample texture times lighting.
-    vec4 col = color * vec4(light,1) * texture2D(texture,coord0);
+    vec4 col = color * vec4(light,1.0) * texture2D(texture,coord0);
     //Apply entity flashes.
     col.rgb = mix(col.rgb,entityColor.rgb,entityColor.a);
 
-    //Calculate fog intensity in or out of water.
-    float fog = (isEyeInWater>0) ? 1.-exp(-gl_FogFragCoord * gl_Fog.density):
-    clamp((gl_FogFragCoord-gl_Fog.start) * gl_Fog.scale, 0., 1.);
+    //Calculate and apply fog.
+    float fog;
+    if(fogMode == GL_LINEAR){
+        fog = clamp((gl_FogFragCoord-gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
+    } else if(fogMode == GL_EXP || isEyeInWater >= 1){
+        fog = clamp(1.0-exp(-gl_FogFragCoord * gl_Fog.density), 0.0, 1.0);
+    }
+    col.rgb = mix(col.rgb, fogColor, fog);
 
-    //Apply the fog.
-    col.rgb = mix(col.rgb, gl_Fog.color.rgb, fog);
+    //Add some dithering to help decrease color banding
+    col.rgb += (fract(52.9829189 * fract(0.06711056 * gl_FragCoord.x + 0.00583715 * gl_FragCoord.y + 0.0003181 * frameCounter)) - 0.5) / 255.0;
 
     //Output the result.
+    /* DRAWBUFFERS:0 */
     gl_FragData[0] = col;
 }

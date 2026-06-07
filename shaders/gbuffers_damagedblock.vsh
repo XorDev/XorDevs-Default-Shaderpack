@@ -14,22 +14,21 @@
 //Include common code
 #include "/common.glsl"
 
-//Diffuse (color) texture.
-uniform sampler2D texture;
+//Get Entity id.
+attribute float mc_Entity;
 
-//Vertex color.
+//Pass vertex information to fragment shader.
 varying vec4 color;
-//Diffuse texture coordinates.
 varying vec2 coord0;
+varying vec2 coord1;
 
 void main()
 {
-    //Visibility amount.
-    vec3 light = vec3(1.0-blindness);
-    //Sample texture times Visibility.
-    vec4 col = color * vec4(light,1.0) * texture2D(texture,coord0);
+    gl_Position = ftransform();
 
-    //Output the result.
-    /* DRAWBUFFERS:0 */
-    gl_FragData[0] = col;
+    //Output color to fragment shader.
+    color = gl_Color;
+    //Output diffuse and lightmap texture coordinates to fragment shader.
+    coord0 = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
+    coord1 = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
 }
